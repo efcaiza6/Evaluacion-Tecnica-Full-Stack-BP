@@ -1,0 +1,34 @@
+# General
+.DS_Store
+Thumbs.db
+
+# Editors
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.classpath
+.project
+.settings/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-error.log*
+
+# Backend - Spring Boot / Maven
+fullstack-bp/target/
+fullstack-bp/.mvn/wrapper/maven-wrapper.jar
+
+# Frontend - Angular / Node
+banco-front/node_modules/
+banco-front/dist/
+banco-front/.angular/
+banco-front/.angular/cache/
+banco-front/out-tsc/
+banco-front/coverage/
+
+# Environment files
+.env
+.env.*

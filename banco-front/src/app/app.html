@@ -1,0 +1,448 @@
+<div class="page">
+  <aside class="sidebar">
+    <div class="brand">BANCO</div>
+
+    <nav class="menu">
+      @for (item of menuItems; track item.key) {
+        <button
+          type="button"
+          class="menu-item"
+          [class.active]="seccionActiva() === item.key"
+          (click)="cambiarSeccion(item.key)"
+        >
+          {{ item.label }}
+        </button>
+      }
+    </nav>
+  </aside>
+
+  <main class="content">
+    <header class="toolbar">
+      <div>
+        <h1>{{ seccionActiva() | titlecase }}</h1>
+        <p class="subtitle">Gestion basica del sistema bancario</p>
+      </div>
+
+      @if (seccionActiva() !== 'reportes') {
+        <input
+          class="search"
+          type="text"
+          placeholder="Buscar"
+          [value]="terminoBusqueda()"
+          (input)="actualizarBusqueda($event)"
+        />
+      }
+    </header>
+
+    @if (mensaje()) {
+      <div class="alert" [class.error]="tipoMensaje() === 'error'">
+        {{ mensaje() }}
+      </div>
+    }
+
+    @if (seccionActiva() === 'clientes') {
+      <section class="panel-grid">
+        <section class="card form-card">
+          <div class="card-header">
+            <h2>{{ editingClienteId ? 'Editar cliente' : 'Nuevo cliente' }}</h2>
+          </div>
+
+          <form class="form-grid" [formGroup]="clienteForm">
+            <label>
+              Nombre
+              <input formControlName="nombre" type="text" />
+              @if (isInvalid('cliente', 'nombre')) {
+                <span class="field-error">Ingrese el nombre</span>
+              }
+            </label>
+            <label>
+              Genero
+              <select formControlName="genero">
+                @for (genero of generos; track genero) {
+                  <option [value]="genero">{{ genero }}</option>
+                }
+              </select>
+            </label>
+            <label>
+              Edad
+              <input formControlName="edad" type="number" min="0" />
+              @if (isInvalid('cliente', 'edad')) {
+                <span class="field-error">Edad no valida</span>
+              }
+            </label>
+            <label>
+              Identificacion
+              <input formControlName="identificacion" type="text" />
+              @if (isInvalid('cliente', 'identificacion')) {
+                <span class="field-error">Ingrese la identificacion</span>
+              }
+            </label>
+            <label>
+              Direccion
+              <input formControlName="direccion" type="text" />
+              @if (isInvalid('cliente', 'direccion')) {
+                <span class="field-error">Ingrese la direccion</span>
+              }
+            </label>
+            <label>
+              Telefono
+              <input formControlName="telefono" type="text" />
+              @if (isInvalid('cliente', 'telefono')) {
+                <span class="field-error">Ingrese el telefono</span>
+              }
+            </label>
+            <label>
+              Cliente ID
+              <input formControlName="clienteId" type="text" />
+              @if (isInvalid('cliente', 'clienteId')) {
+                <span class="field-error">Ingrese el cliente ID</span>
+              }
+            </label>
+            <label>
+              Contrasena
+              <input formControlName="contrasena" type="password" />
+              @if (isInvalid('cliente', 'contrasena')) {
+                <span class="field-error">Ingrese la contrasena</span>
+              }
+            </label>
+            <label>
+              Estado
+              <select formControlName="estado">
+                @for (estado of estados; track estado) {
+                  <option [value]="estado">{{ estado }}</option>
+                }
+              </select>
+            </label>
+          </form>
+
+          <div class="actions">
+            <button type="button" class="btn btn-primary" (click)="guardarCliente()">Guardar</button>
+            <button type="button" class="btn" (click)="cancelarCliente()">Limpiar</button>
+          </div>
+        </section>
+
+        <section class="card table-card">
+          <div class="card-header">
+            <h2>Listado</h2>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Identificacion</th>
+                  <th>Cliente ID</th>
+                  <th>Estado</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (cliente of clientesFiltrados(); track cliente.id ?? cliente.identificacion) {
+                  <tr>
+                    <td>{{ cliente.nombre }}</td>
+                    <td>{{ cliente.identificacion }}</td>
+                    <td>{{ cliente.clienteId }}</td>
+                    <td>{{ cliente.estado }}</td>
+                    <td class="table-actions">
+                      <button type="button" class="link-btn" (click)="editarCliente(cliente)">Editar</button>
+                      <button type="button" class="link-btn danger" (click)="eliminarCliente(cliente.id)">Eliminar</button>
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="5" class="empty">No hay registros</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+    }
+
+    @if (seccionActiva() === 'cuentas') {
+      <section class="panel-grid">
+        <section class="card form-card">
+          <div class="card-header">
+            <h2>{{ editingCuentaId ? 'Editar cuenta' : 'Nueva cuenta' }}</h2>
+          </div>
+
+          <form class="form-grid" [formGroup]="cuentaForm">
+            <label>
+              Numero de cuenta
+              <input formControlName="numeroCuenta" type="text" />
+              @if (isInvalid('cuenta', 'numeroCuenta')) {
+                <span class="field-error">Ingrese el numero de cuenta</span>
+              }
+            </label>
+            <label>
+              Tipo de cuenta
+              <select formControlName="tipoCuenta">
+                @for (tipo of tiposCuenta; track tipo) {
+                  <option [value]="tipo">{{ tipo }}</option>
+                }
+              </select>
+            </label>
+            <label>
+              Saldo inicial
+              <input formControlName="saldoInicial" type="number" min="0" step="0.01" />
+              @if (isInvalid('cuenta', 'saldoInicial')) {
+                <span class="field-error">Ingrese un saldo valido</span>
+              }
+            </label>
+            <label>
+              Estado
+              <select formControlName="estado">
+                @for (estado of estados; track estado) {
+                  <option [value]="estado">{{ estado }}</option>
+                }
+              </select>
+            </label>
+            <label class="full-width">
+              Cliente
+              <select formControlName="clienteId">
+                <option [ngValue]="0">Seleccione</option>
+                @for (cliente of clientes(); track cliente.id) {
+                  <option [ngValue]="cliente.id">{{ cliente.nombre }}</option>
+                }
+              </select>
+              @if (isInvalid('cuenta', 'clienteId')) {
+                <span class="field-error">Seleccione un cliente</span>
+              }
+            </label>
+          </form>
+
+          <div class="actions">
+            <button type="button" class="btn btn-primary" (click)="guardarCuenta()">Guardar</button>
+            <button type="button" class="btn" (click)="cancelarCuenta()">Limpiar</button>
+          </div>
+        </section>
+
+        <section class="card table-card">
+          <div class="card-header">
+            <h2>Listado</h2>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Numero</th>
+                  <th>Cliente</th>
+                  <th>Tipo</th>
+                  <th>Saldo</th>
+                  <th>Estado</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (cuenta of cuentasFiltradas(); track cuenta.id ?? cuenta.numeroCuenta) {
+                  <tr>
+                    <td>{{ cuenta.numeroCuenta }}</td>
+                    <td>{{ cuenta.cliente?.nombre }}</td>
+                    <td>{{ cuenta.tipoCuenta }}</td>
+                    <td>{{ formatCurrency(cuenta.saldoDisponible) }}</td>
+                    <td>{{ cuenta.estado }}</td>
+                    <td class="table-actions">
+                      <button type="button" class="link-btn" (click)="editarCuenta(cuenta)">Editar</button>
+                      <button type="button" class="link-btn danger" (click)="eliminarCuenta(cuenta.id)">Eliminar</button>
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="6" class="empty">No hay registros</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+    }
+
+    @if (seccionActiva() === 'movimientos') {
+      <section class="panel-grid">
+        <section class="card form-card">
+          <div class="card-header">
+            <h2>{{ editingMovimientoId ? 'Editar movimiento' : 'Nuevo movimiento' }}</h2>
+          </div>
+
+          <form class="form-grid" [formGroup]="movimientoForm">
+            <label>
+              Fecha
+              <input formControlName="fecha" type="date" />
+              @if (isInvalid('movimiento', 'fecha')) {
+                <span class="field-error">Seleccione la fecha</span>
+              }
+            </label>
+            <label>
+              Tipo
+              <select formControlName="tipoMovimiento">
+                @for (tipo of tiposMovimiento; track tipo) {
+                  <option [value]="tipo">{{ tipo }}</option>
+                }
+              </select>
+            </label>
+            <label>
+              Valor
+              <input formControlName="valor" type="number" min="0" step="0.01" />
+              @if (isInvalid('movimiento', 'valor')) {
+                <span class="field-error">Ingrese un valor valido</span>
+              }
+            </label>
+            <label class="full-width">
+              Cuenta
+              <select formControlName="cuentaId">
+                <option [ngValue]="0">Seleccione</option>
+                @for (cuenta of cuentas(); track cuenta.id) {
+                  <option [ngValue]="cuenta.id">{{ cuenta.numeroCuenta }} - {{ cuenta.cliente?.nombre }}</option>
+                }
+              </select>
+              @if (isInvalid('movimiento', 'cuentaId')) {
+                <span class="field-error">Seleccione una cuenta</span>
+              }
+            </label>
+          </form>
+
+          <div class="actions">
+            <button type="button" class="btn btn-primary" (click)="guardarMovimiento()">Guardar</button>
+            <button type="button" class="btn" (click)="cancelarMovimiento()">Limpiar</button>
+          </div>
+        </section>
+
+        <section class="card table-card">
+          <div class="card-header">
+            <h2>Listado</h2>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Cuenta</th>
+                  <th>Tipo</th>
+                  <th>Valor</th>
+                  <th>Saldo</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (movimiento of movimientosFiltrados(); track movimiento.id ?? (movimiento.fecha + movimiento.valor)) {
+                  <tr>
+                    <td>{{ movimiento.fecha }}</td>
+                    <td>{{ movimiento.cuenta?.numeroCuenta }}</td>
+                    <td>{{ movimiento.tipoMovimiento }}</td>
+                    <td [class.negative]="isNegative(movimiento.valor)">{{ formatCurrency(movimiento.valor) }}</td>
+                    <td>{{ formatCurrency(movimiento.saldo) }}</td>
+                    <td class="table-actions">
+                      <button type="button" class="link-btn" (click)="editarMovimiento(movimiento)">Editar</button>
+                      <button type="button" class="link-btn danger" (click)="eliminarMovimiento(movimiento.id)">Eliminar</button>
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="6" class="empty">No hay registros</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+    }
+
+    @if (seccionActiva() === 'reportes') {
+      <section class="card report-card">
+        <div class="card-header">
+          <h2>Estado de cuenta</h2>
+        </div>
+
+        <form class="report-filters" [formGroup]="reporteForm">
+          <label>
+            Cliente
+            <select formControlName="clienteId">
+              <option [ngValue]="0">Seleccione</option>
+              @for (cliente of clientes(); track cliente.id) {
+                <option [ngValue]="cliente.id">{{ cliente.nombre }}</option>
+              }
+            </select>
+            @if (isInvalid('reporte', 'clienteId')) {
+              <span class="field-error">Seleccione un cliente</span>
+            }
+          </label>
+          <label>
+            Fecha desde
+            <input formControlName="fechaDesde" type="date" />
+            @if (isInvalid('reporte', 'fechaDesde')) {
+              <span class="field-error">Seleccione la fecha inicial</span>
+            }
+          </label>
+          <label>
+            Fecha hasta
+            <input formControlName="fechaHasta" type="date" />
+            @if (isInvalid('reporte', 'fechaHasta')) {
+              <span class="field-error">Seleccione la fecha final</span>
+            }
+          </label>
+        </form>
+
+        <div class="actions">
+          <button type="button" class="btn btn-primary" (click)="generarReporte()">Consultar</button>
+          <button type="button" class="btn btn-secondary" (click)="descargarPdf()">Descargar PDF</button>
+        </div>
+
+        @if (reporte()) {
+          <div class="report-summary">
+            <p><strong>Cliente:</strong> {{ reporte()?.cliente }}</p>
+            <p><strong>Rango:</strong> {{ reporte()?.fechaDesde }} al {{ reporte()?.fechaHasta }}</p>
+          </div>
+
+          @for (cuenta of reporte()?.cuentas ?? []; track cuenta.numeroCuenta) {
+            <section class="report-block">
+              <div class="report-head">
+                <div>
+                  <h3>{{ cuenta.numeroCuenta }}</h3>
+                  <span>{{ cuenta.tipoCuenta }}</span>
+                </div>
+                <div class="report-totals">
+                  <span>Saldo: {{ formatCurrency(cuenta.saldoDisponible) }}</span>
+                  <span>Creditos: {{ formatCurrency(cuenta.totalCreditos) }}</span>
+                  <span>Debitos: {{ formatCurrency(cuenta.totalDebitos) }}</span>
+                </div>
+              </div>
+
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Fecha</th>
+                      <th>Tipo</th>
+                      <th>Valor</th>
+                      <th>Saldo</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (movimiento of cuenta.movimientos; track movimiento.fecha + movimiento.valor + movimiento.saldo) {
+                      <tr>
+                        <td>{{ movimiento.fecha }}</td>
+                        <td>{{ movimiento.tipoMovimiento }}</td>
+                        <td [class.negative]="isNegative(movimiento.valor)">{{ formatCurrency(movimiento.valor) }}</td>
+                        <td>{{ formatCurrency(movimiento.saldo) }}</td>
+                      </tr>
+                    } @empty {
+                      <tr>
+                        <td colspan="4" class="empty">No hay movimientos en ese rango</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          }
+        }
+      </section>
+    }
+  </main>
+</div>

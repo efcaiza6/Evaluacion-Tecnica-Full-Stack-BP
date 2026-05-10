@@ -1,0 +1,14 @@
+services:
+  backend:
+    build:
+      context: ./fullstack-bp
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build:
+      context: ./banco-front
+    ports:
+      - "4200:80"
+    depends_on:
+      - backend
